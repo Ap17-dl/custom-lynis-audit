@@ -1,0 +1,87 @@
+#!/bin/sh
+
+##############################################################################
+# Custom Test - Firewall and Stealth Mode
+##############################################################################
+
+Register --test-no FIRE-9001 \
+         --weight L \
+         --network NO \
+         --category security \
+         --description "Check macOS Firewall and Stealth Mode"
+
+if [ ${SKIPTEST} -eq 0 ]; then
+
+    FIREWALL_BIN="/usr/libexec/ApplicationFirewall/socketfilterfw"
+
+    if [ ! -x "${FIREWALL_BIN}" ]; then
+        LogText "Firewall daemon not found"
+        Report "firewall_daemon=missing"
+        ReportWarning "FIRE-9001" "Firewall daemon not found"
+        exit 0
+    fi
+
+    # Check Firewall Status
+    FW_STATUS=$(${FIREWALL_BIN} --getglobalstate 2>/dev/null)
+
+    if echo "${FW_STATUS}" | grep -qi "enabled"; then
+        LogText "Firewall ENABLED"
+        Report "firewall_status=enabled"
+        AddHP 5 5
+    else
+        LogText "Firewall DISABLED"
+        Report "firewall_status=disabled"
+        ReportWarning "FIRE-9001" "Firewall is disabled"
+        AddHP 0 5
+    fi
+
+    # Check Stealth Mode
+    STEALTH_STATUS=$(${FIREWALL_BIN} --getstealthmode 2>/dev/null)
+
+    if echo "${STEALTH_STATUS}" | grep -qi "on"; then
+        LogText "Stealth Mode ENABLED"
+        Report "stealth_mode=enabled"
+    else
+        LogText "Stealth Mode DISABLED"
+        Report "stealth_mode=disabled"
+        ReportWarning "FIRE-9001" "Stealth Mode is disabled"
+    fi
+
+fi
+##############################################################################
+# Custom Test - FileVault Encryption
+##############################################################################
+
+Register --test-no CRYP-9001 \
+    --weight L \
+    --network NO \
+    --category security \
+    --description "Check macOS FileVault disk encryption"
+
+if [ ${SKIPTEST} -eq 0 ]; then
+
+    if command -v fdesetup >/dev/null 2>&1; then
+        FILEVAULT_STATUS=$(fdesetup status 2>&1)
+
+        if echo "${FILEVAULT_STATUS}" | grep -qi "FileVault is On"; then
+            Display --indent 2 --text "- FileVault disk encryption" \
+                --result "ENABLED" --color GREEN
+            LogText "CRYP-9001: FileVault is enabled"
+            Report "filevault_status=enabled"
+            AddHP 5 5
+        else
+            Display --indent 2 --text "- FileVault disk encryption" \
+                --result "DISABLED OR UNVERIFIED" --color YELLOW
+            LogText "CRYP-9001: FileVault is disabled or unverified"
+            Report "filevault_status=disabled_or_unverified"
+            ReportWarning "${TEST_NO}" \
+                "FileVault is disabled or its status could not be verified"
+            AddHP 0 5
+        fi
+    else
+        LogText "CRYP-9001: fdesetup command unavailable"
+        Report "filevault_status=unknown"
+    fi
+
+fi
+
