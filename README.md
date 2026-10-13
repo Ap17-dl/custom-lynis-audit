@@ -25,16 +25,10 @@ lynis-macos-security-enhancements/
 ├── README.md
 ├── tests_custom
 ├── tests_firewall_macos
-└── screenshots/
-    ├── reference-script.png
-    ├── filevault-test.png
-    ├── firewall-test.png
-    └── lynis-audit-output.png
 ```
 
 - `tests_custom` contains the custom tests loaded by Lynis, including the FileVault and firewall audit logic.
 - `tests_firewall_macos` contains the standalone macOS firewall audit script.
-- `screenshots/` stores evidence captured during testing.
 
 ## Enhancement 1: FileVault Encryption Audit
 
