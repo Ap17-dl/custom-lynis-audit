@@ -11,7 +11,7 @@
 #   Purpose: Verify that the macOS firewall is enabled and stealth mode is 
 #            configured to avoid responding to network probes and scans.
 #   
-#   Author: [Your Name]
+#   Author: Ankush Pratham
 #   Date Created: July 2026
 #   macOS Compatibility: 10.5 (Leopard) and later
 #
